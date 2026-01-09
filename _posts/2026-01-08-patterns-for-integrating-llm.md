@@ -7,13 +7,11 @@ summary: In this blog I look at the landscapes of different architectural patter
 author: sbreingan
 ---
 
-# High-Level LLM Architecture Patterns
-
 Large Language Models are being integrated into applications and services across industries. But what does this actually look like architecturally? What are the main approaches available?
 
 In this blog post, I'll give a high-level view of the key architectural patterns for LLM integration. These patterns represent different ways of structuring how your application interacts with and leverages LLMs, from simple API calls to complex agent-based systems.
 
-This is a rapidly evolving space - that's why [architecture is exiciting again](https://blog.scottlogic.com/2023/05/04/generative-ai-solution-architecture.html]! The patterns I describe here reflect how LLM usage has evolved so far. Some architectural principles may persist, but I expect new patterns and approaches to emerge as the field progresses and as models themselves become more capable.
+This is a rapidly evolving space - that's why [architecture is exiciting again](https://blog.scottlogic.com/2023/05/04/generative-ai-solution-architecture.html)! The patterns I describe here reflect how LLM usage has evolved so far. Some architectural principles may persist, but I expect new patterns and approaches to emerge as the field progresses and as models themselves become more capable.
 
 To make these patterns concrete, I've included implementation examples using AWS (where my experience lies). However, these patterns are platform-agnostic - the core approaches apply whether you're working with AWS Bedrock, Azure OpenAI, Google Vertex AI, or self-hosted infrastructure.
 
@@ -34,16 +32,16 @@ Every time we call the LLM, we provide this context. These models have limited c
 
 A local council receives hundreds of enquiries daily. A simple LLM wrapper could handle initial triage:
 
-```python
+~~~ python
 System Prompt:
 "You are a council enquiry triage assistant. Classify incoming citizen 
 enquiries into: Planning, Waste Services, Council Tax, Housing, Highways, Other. 
 
 For each enquiry provide category, urgency (Low/Medium/High), and brief summary.
 Respond only in JSON format."
-```
+~~~
 
-**Input:** "My bin hasn't been collected for two weeks"
+**Input:** `My bin hasn't been collected for two weeks`
 
 **Output:** `{"category": "Waste Services", "urgency": "Medium", "summary": "Missed collection"}`
 
@@ -51,7 +49,7 @@ Respond only in JSON format."
 
 In AWS, Bedrock provides API access to frontier models. Call it from a Lambda or your application:
 
-```python
+~~~ python
 import boto3
 
 bedrock = boto3.client('bedrock-runtime')
@@ -64,7 +62,7 @@ response = bedrock.converse(
     system=[{'text': system_prompt}],
     inferenceConfig={'temperature': 0.0, 'maxTokens': 500}
 )
-```
+~~~
 
 ### Limitations
 
@@ -88,7 +86,7 @@ If most FOI requests are simple, you can save time, money, and energy by routing
 
 ### Example: Orchestrated FOI Handler
 
-```python
+~~~python
 # Step 1: Classify with fast, cheap model
 classification = bedrock.converse(
     modelId='anthropic.claude-3-5-haiku-20241022-v1:0',
@@ -104,7 +102,7 @@ else:
     model = 'anthropic.claude-3-5-sonnet-20241022-v2:0'  # Powerful, expensive
 
 response = bedrock.converse(modelId=model, messages=[...])
-```
+~~~
 
 This trades some latency (multiple calls) for cost efficiency and appropriate model selection. However, it still relies on knowledge baked into the models. When you need organizational data - policies, records, documentation - you need retrieval.
 
@@ -136,7 +134,7 @@ When you receive a query:
 
 #### Example: Planning Permission Assistant
 
-```python
+~~~ python
 bedrock_agent = boto3.client('bedrock-agent-runtime')
 
 # Retrieve relevant chunks from Knowledge Base
@@ -155,7 +153,7 @@ response = bedrock.converse(
     modelId='anthropic.claude-3-5-sonnet-20241022-v2:0',
     messages=[{'role': 'user', 'content': [{'text': f'Context:\n{context}\n\nQuestion: {question}'}]}]
 )
-```
+~~~
 
 Managed services like AWS Bedrock Knowledge Bases handle chunking, embedding, and retrieval automatically - you simply point it to an S3 bucket of documents.
 
@@ -169,7 +167,7 @@ When data is highly relational - where connections between entities matter as mu
 
 #### Example: Regulatory Compliance Navigator
 
-```python
+~~~ python
 # Step 1: Convert natural language to Cypher using LLM
 cypher_response = bedrock.converse(
     modelId='anthropic.claude-3-5-sonnet-20241022-v2:0',
@@ -187,7 +185,7 @@ results = graph_client.run(cypher_query)
 formatted = bedrock.converse(
     messages=[{'role': 'user', 'content': [{'text': f'Format these results: {results}'}]}]
 )
-```
+~~~
 
 **Why graphs over relational databases?** While you could use text-to-SQL with traditional databases, Cypher queries map more naturally to natural language. Relationships in graphs are first-class citizens - "which regulations apply to public sector in Scotland" translates more directly to graph traversal than complex SQL joins.
 
@@ -222,7 +220,7 @@ Under the hood, it's still orchestrated LLM calls, but the model's output serves
 
 An agent handling multi-step citizen requests might have access to:
 
-```python
+~~~ python
 tools = [
     {
         'name': 'check_bin_schedule',
@@ -247,11 +245,11 @@ tools = [
         }
     }
 ]
-```
+~~~
 
 ### Implementation
 
-```python
+~~~ python
 bedrock_agent = boto3.client('bedrock-agent-runtime')
 
 response = bedrock_agent.invoke_agent(
@@ -266,7 +264,7 @@ response = bedrock_agent.invoke_agent(
 # 2. Calls appropriate tools in sequence
 # 3. Uses outputs to inform next actions
 # 4. Returns final result
-```
+~~~
 
 **Example request:** "My recycling wasn't collected last Tuesday at SW1A 1AA. Can you check when it's next due and report it?"
 
@@ -327,7 +325,7 @@ The new information is "low rank" - it doesn't override fundamentals but adapts 
 
 Train on 5,000 radiologist reports showing structure, terminology, and phrasing:
 
-```python
+~~~ python
 # Training data format
 {
     "prompt": "Patient presents with acute chest pain, left arm radiation, diaphoresis",
@@ -342,7 +340,7 @@ response = bedrock.converse(
     modelId='arn:aws:bedrock:region:account:provisioned-model/your-custom-model',
     messages=[{'role': 'user', 'content': [{'text': clinical_findings}]}]
 )
-```
+~~~
 
 The fine-tuned model now uses correct medical terminology, follows hospital report structure, and maintains consistent formatting.
 

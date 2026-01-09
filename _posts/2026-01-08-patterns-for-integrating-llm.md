@@ -25,9 +25,10 @@ Large Language Models have been trained on huge amounts of data and know a lot a
 
 The first step to integrating LLMs is simple: **treat the LLM as an API** that brings that power into your application or service.
 
-How do we make it behave in a way specific to our domain? **We tell it.** This is where prompt engineering becomes relevant - much of the design is in how we write our system prompts, how we instruct it to behave, and what context we provide. This is all text given to the model.
+How do we make it behave in a way specific to our domain? **We tell it.** 
+This is where _prompt engineering_ becomes relevant - much of the design is in how we write our system prompts, how we instruct it to behave, and what context we provide. This is all text given to the model.
 
-Every time we call the LLM, we provide this context. These models have limited context windows (typically 100k-200k tokens), so we need to think carefully about what we include and how we want the model to respond.
+Every time we call the LLM, we provide this context. These models have limited context windows so we need to think carefully about what we include and how we want the model to respond.
 
 ### Example: Citizen Enquiry Triage
 
@@ -48,7 +49,7 @@ Respond only in JSON format."
 
 ### Implementation
 
-In AWS, Bedrock provides API access to frontier models. Call it from a Lambda or your application:
+In AWS, Bedrock provides API access to frontier models. You can call it from a Lambda or your application:
 
 ~~~ python
 import boto3
@@ -68,10 +69,11 @@ response = bedrock.converse(
 ### Limitations
 
 This pattern works well for contained tasks, but:
-    - Context window limits constrain how much information you can provide
-    - No access to external organizational data
-    - Token costs scale with context size
-    - Output format consistency requires careful prompting
+
+- Context window limits constrain how much information you can provide
+- No access to external organizational data
+- Token costs scale with context size
+- Output format consistency requires careful prompting
 
 When you need access to large document stores or organizational data, you need retrieval capabilities.
 
@@ -112,6 +114,7 @@ This trades some latency (multiple calls) for cost efficiency and appropriate mo
 ## Pattern #3: The Retriever
 
 So far, our LLM calls rely on:
+
 - Knowledge from training
 - Context provided in our prompts
 
@@ -124,11 +127,13 @@ This is where **Retrieval-Augmented Generation (RAG)** comes in - "when generati
 Perhaps you have hundreds of planning policy documents. When enquiries arrive, you want to generate responses using the most relevant ones. How does the LLM search hundreds of documents?
 
 We use **embedding**:
+
 - Chunk documents into pieces (paragraphs/sections, typically 500-1000 tokens with overlap)
 - Convert chunks into vectors using an embedding model
 - Store vectors in a vector database
 
 When you receive a query:
+
 - Embed the query into numbers
 - Find nearest document chunks using vector similarity
 - Add relevant chunks to the LLM's context

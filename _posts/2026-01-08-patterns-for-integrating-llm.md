@@ -11,10 +11,11 @@ Large Language Models are being integrated into applications and services across
 
 In this blog post, I'll give a high-level view of the key architectural patterns for LLM integration. These patterns represent different ways of structuring how your application interacts with and leverages LLMs, from simple API calls to complex agent-based systems.
 
-This is a rapidly evolving space - that's why [architecture is exiciting again](https://blog.scottlogic.com/2023/05/04/generative-ai-solution-architecture.html)! The patterns I describe here reflect how LLM usage has evolved so far. Some architectural principles may persist, but I expect new patterns and approaches to emerge as the field progresses and as models themselves become more capable.
+This is a rapidly evolving space - that's why [architecture is exciting again](https://blog.scottlogic.com/2023/05/04/generative-ai-solution-architecture.html)! The patterns I describe here reflect how LLM usage has evolved so far. Some architectural principles may persist, but I expect new patterns and approaches to emerge as the field progresses and as models themselves become more capable.
+
+I've kept these patterns high-level, focusing on the core approaches. In practice, each pattern brings significant architectural choices around validation, testing, observability, security, and risk mitigation. Understanding which pattern fits your use case is just the beginning - the real architectural work lies in how you implement these patterns safely and reliably in production. That's where the most interesting decisions emerge, and where patterns continue to evolve.
 
 To make these patterns concrete, I've included implementation examples using AWS (where my experience lies). However, these patterns are platform-agnostic - the core approaches apply whether you're working with AWS Bedrock, Azure OpenAI, Google Vertex AI, or self-hosted infrastructure.
-
 
 ---
 
@@ -67,10 +68,10 @@ response = bedrock.converse(
 ### Limitations
 
 This pattern works well for contained tasks, but:
-- Context window limits constrain how much information you can provide
-- No access to external organizational data
-- Token costs scale with context size
-- Output format consistency requires careful prompting
+    - Context window limits constrain how much information you can provide
+    - No access to external organizational data
+    - Token costs scale with context size
+    - Output format consistency requires careful prompting
 
 When you need access to large document stores or organizational data, you need retrieval capabilities.
 
@@ -203,16 +204,18 @@ However, even with sophisticated retrieval, there are scenarios where you need t
 
 ## Pattern #4: The Agent
 
-We've moved from single LLM calls to orchestrated calls to using LLMs to query databases. The evolution is to apply these patterns more broadly - the LLM is no longer just text in → text out, but text in → action request → perform action.
+We've moved from single LLM calls to orchestrated calls to using LLMs to query databases. But in all these patterns, the workflow is predetermined - in orchestration, your code decides the flow; in retrieval, it's always retrieve-then-generate.
+
+Agents take a different approach: the LLM itself decides which actions to take and when. Document retrieval or database queries become tools the agent can choose to use, alongside other actions. The agent might retrieve from a knowledge base, call an external API, do both in sequence, or neither - it reasons about what the input requires rather than following a fixed workflow.
 
 This is the **agent pattern** - give the LLM access to various tools and let it decide which to use.
 
 We're essentially saying:
-- The LLM agent has access to tools with descriptions and input schemas
-- It receives input and maps it to potential actions
-- If tools are relevant, it calls them and awaits responses
-- It repeats until fully processing the input
-- It returns the result
+    - The LLM agent has access to tools with descriptions and input schemas
+    - It receives input and maps it to potential actions
+    - If tools are relevant, it calls them and awaits responses
+    - It repeats until fully processing the input
+    - It returns the result
 
 Under the hood, it's still orchestrated LLM calls, but the model's output serves as input to external actions.
 
@@ -279,11 +282,11 @@ An MCP server for council services might expose multiple tools (bin schedules, s
 ### Limitations
 
 Agents are powerful but have significant limitations:
-- **Tool hallucination**: Might call non-existent tools or use incorrect parameters
-- **Observability**: Difficult to debug why particular action sequences were chosen
-- **Cost**: Iterative LLM calls become expensive quickly
-- **Non-determinism**: Same input might produce different tool sequences
-- **Description quality**: Vague tool descriptions lead to incorrect selection
+    - **Tool hallucination**: Might call non-existent tools or use incorrect parameters
+    - **Observability**: Difficult to debug why particular action sequences were chosen
+    - **Cost**: Iterative LLM calls become expensive quickly
+    - **Non-determinism**: Same input might produce different tool sequences
+    - **Description quality**: Vague tool descriptions lead to incorrect selection
 
 The more freedom given to take actions, the more care needed with monitoring and understanding behavior.
 
@@ -347,15 +350,15 @@ The fine-tuned model now uses correct medical terminology, follows hospital repo
 ### When to Fine-Tune
 
 Fine-tuning works well for:
-- Teaching specific output formats (JSON schemas, report structures)
-- Domain-specific language (legal, medical, technical terminology)
-- Style and tone consistency
-- Task-specific patterns (entity extraction, classification)
+    - Teaching specific output formats (JSON schemas, report structures)
+    - Domain-specific language (legal, medical, technical terminology)
+    - Style and tone consistency
+    - Task-specific patterns (entity extraction, classification)
 
 Fine-tuning does NOT work for:
-- Adding new factual knowledge (use RAG instead)
-- Fixing hallucinations (may make worse)
-- Information that changes frequently
+    - Adding new factual knowledge (use RAG instead)
+    - Fixing hallucinations (may make worse)
+    - Information that changes frequently
 
 For facts and current information, use retrieval. For patterns and behaviors, use fine-tuning. Often, you'll use both: RAG for facts, fine-tuning for format and style.
 
@@ -374,21 +377,21 @@ Regardless of which pattern you choose, production LLM systems need protective l
 ### What Guardrails Provide
 
 **Input Protection:**
-- Content filtering to block inappropriate requests
-- PII detection and redaction before reaching the model
-- Prompt injection defense against malicious override attempts
+    - Content filtering to block inappropriate requests
+    - PII detection and redaction before reaching the model
+    - Prompt injection defense against malicious override attempts
 
 **Output Validation:**
-- Content policy enforcement for organizational standards
-- Format validation for expected schemas
-- Hallucination detection flagging confident but inaccurate responses
+    - Content policy enforcement for organizational standards
+    - Format validation for expected schemas
+    - Hallucination detection flagging confident but inaccurate responses
 
 **Compliance & Governance:**
-- Audit trails for all interactions
-- Rate limiting to prevent runaway costs
-- Access control ensuring authorized use only
+    - Audit trails for all interactions
+    - Rate limiting to prevent runaway costs
+    - Access control ensuring authorized use only
 
-AWS Bedrock Guardrails can be configured with content filters, denied topics, word filters, PII redaction, and contextual grounding checks. Apply them by adding a `guardrailConfig` parameter to your Bedrock API calls.
+AWS Bedrock Guardrails can be configured with content filters, denied topics, word filters, PII redaction, and contextual grounding checks by applying a config parameter to API calls. 
 
 Guardrails aren't optional for production systems - they're essential protective measures for every pattern discussed.
 

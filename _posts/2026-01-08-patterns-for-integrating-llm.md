@@ -334,41 +334,40 @@ The new information is "low rank" - it doesn't override fundamentals but adapts 
 
 ### Example: Medical Report Generation
 
-Train on 5,000 radiologist reports showing structure, terminology, and phrasing:
+### Example: Medical Report Generation
 
-~~~ python
-# Training data format
-{
-    "prompt": "Patient presents with acute chest pain, left arm radiation, diaphoresis",
-    "completion": "CLINICAL FINDINGS:\n\nPatient History: 67M with acute chest pain\n..."
-}
+Consider a hospital that needs to generate standardized radiology reports. They have 5,000 existing reports that demonstrate the required structure, medical terminology, and phrasing conventions.
 
-# Fine-tune through Bedrock
-# Upload training data to S3, create customization job
-# Access fine-tuned model via custom endpoint
+Rather than using RAG (which would retrieve similar past reports), they could fine-tune a model to *learn* the reporting patterns:
 
-response = bedrock.converse(
-    modelId='arn:aws:bedrock:region:account:provisioned-model/your-custom-model',
-    messages=[{'role': 'user', 'content': [{'text': clinical_findings}]}]
-)
-~~~
+**Training data would include examples like:**
 
-The fine-tuned model now uses correct medical terminology, follows hospital report structure, and maintains consistent formatting.
+- Input: "Patient presents with acute chest pain, left arm radiation, diaphoresis"
+- Output: Properly formatted report with sections (Clinical Findings, Patient History, Impression, Recommendations) using correct medical terminology
+
+**After fine-tuning, the model has learned:**
+
+- Hospital-specific report structure and section headers
+- Appropriate medical terminology and phrasing conventions  
+- Consistent formatting and sign-off requirements
+- Tone and style matching the institution's standards
+
+The fine-tuned model can then generate reports that match the house style automatically, without needing to retrieve and reference past reports each time. The radiologist provides clinical findings, and the model generates a properly formatted report following learned patterns.
 
 ### When to Fine-Tune
 
 Fine-tuning works well for:
 
-    - Teaching specific output formats (JSON schemas, report structures)
-    - Domain-specific language (legal, medical, technical terminology)
-    - Style and tone consistency
-    - Task-specific patterns (entity extraction, classification)
+- Teaching specific output formats (JSON schemas, report structures)
+- Domain-specific language (legal, medical, technical terminology)
+- Style and tone consistency
+- Task-specific patterns (entity extraction, classification)
 
 Fine-tuning does NOT work for:
 
-    - Adding new factual knowledge (use RAG instead)
-    - Fixing hallucinations (may make worse)
-    - Information that changes frequently
+- Adding new factual knowledge (use RAG instead)
+- Fixing hallucinations (may make worse)
+- Information that changes frequently
 
 For facts and current information, use retrieval. For patterns and behaviors, use fine-tuning. Often, you'll use both: RAG for facts, fine-tuning for format and style.
 

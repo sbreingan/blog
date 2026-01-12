@@ -216,6 +216,7 @@ Agents take a different approach: the LLM itself decides which actions to take a
 This is the **agent pattern** - give the LLM access to various tools and let it decide which to use.
 
 We're essentially saying:
+
     - The LLM agent has access to tools with descriptions and input schemas
     - It receives input and maps it to potential actions
     - If tools are relevant, it calls them and awaits responses
@@ -287,6 +288,7 @@ An MCP server for council services might expose multiple tools (bin schedules, s
 ### Limitations
 
 Agents are powerful but have significant limitations:
+
     - **Tool hallucination**: Might call non-existent tools or use incorrect parameters
     - **Observability**: Difficult to debug why particular action sequences were chosen
     - **Cost**: Iterative LLM calls become expensive quickly
@@ -322,6 +324,7 @@ We want domain-specific understanding without losing general language knowledge.
 **LoRA (Low-Rank Adaptation)** doesn't retrain all parameters. Instead, we add small adapter layers on top and train only those.
 
 Think of it as:
+
 - **Base model knows English grammar** (frozen - billions of parameters)
 - **Adapter adds medical terminology** (new - millions of parameters)
 
@@ -355,12 +358,14 @@ The fine-tuned model now uses correct medical terminology, follows hospital repo
 ### When to Fine-Tune
 
 Fine-tuning works well for:
+
     - Teaching specific output formats (JSON schemas, report structures)
     - Domain-specific language (legal, medical, technical terminology)
     - Style and tone consistency
     - Task-specific patterns (entity extraction, classification)
 
 Fine-tuning does NOT work for:
+
     - Adding new factual knowledge (use RAG instead)
     - Fixing hallucinations (may make worse)
     - Information that changes frequently
@@ -382,16 +387,19 @@ Regardless of which pattern you choose, production LLM systems need protective l
 ### What Guardrails Provide
 
 **Input Protection:**
+
     - Content filtering to block inappropriate requests
     - PII detection and redaction before reaching the model
     - Prompt injection defense against malicious override attempts
 
 **Output Validation:**
+
     - Content policy enforcement for organizational standards
     - Format validation for expected schemas
     - Hallucination detection flagging confident but inaccurate responses
 
 **Compliance & Governance:**
+
     - Audit trails for all interactions
     - Rate limiting to prevent runaway costs
     - Access control ensuring authorized use only

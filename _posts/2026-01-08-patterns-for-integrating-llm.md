@@ -34,8 +34,8 @@ Every time we call the LLM, we provide this context. These models have limited c
 
 A local council receives hundreds of enquiries daily. A simple LLM wrapper could handle initial triage:
 
-~~~ python
-System Prompt:
+You create a system prompt to define it's behaviour:
+~~~
 "You are a council enquiry triage assistant. Classify incoming citizen 
 enquiries into: Planning, Waste Services, Council Tax, Housing, Highways, Other. 
 

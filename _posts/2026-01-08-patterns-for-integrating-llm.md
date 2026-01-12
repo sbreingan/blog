@@ -75,17 +75,15 @@ This pattern works well for contained tasks, but:
 - Token costs scale with context size
 - Output format consistency requires careful prompting
 
-When you need access to large document stores or organizational data, you need retrieval capabilities.
-
 ---
 
 ## Pattern #2: The Orchestrator
 
 Now let's say you have multiple steps to perform. Rather than "call the LLM once," you want to make further calls based on responses, potentially using **different models** for different tasks.
 
-Suppose you're handling Freedom of Information (FOI) requests. You could write one large system prompt to handle everything, but this has downsides. Reasoning models like Claude Sonnet cost significantly more (around $3-15 per million tokens) compared to lightweight models like Haiku (around $0.25-1.25 per million tokens).
+Why would you want to do this? Suppose you're handling Freedom of Information (FOI) requests. You _could_ write one large system prompt to handle everything, but this has downsides. Reasoning models like Claude Sonnet cost significantly more (around $3-15 per million tokens) compared to lightweight models like Haiku (around $0.25-1.25 per million tokens) and use more energy.
 
-If most FOI requests are simple, you can save time, money, and energy by routing to cheaper models. **Orchestration** means splitting into multiple LLM calls, checking outputs, and choosing the right model and prompt based on what came before.
+If most FOI requests are simple, you can save time, money, and energy by routing to cheaper models. **Orchestration** means adding business logic which handles splitting into multiple LLM calls, checking outputs, and choosing the right model and prompt based on what came before.
 
 ### Example: Orchestrated FOI Handler
 
@@ -118,7 +116,7 @@ So far, our LLM calls rely on:
 - Knowledge from training
 - Context provided in our prompts
 
-But real power often comes from applying LLMs to proprietary organizational data. You may have many documents too large or numerous to include as context.
+But real power often comes from applying LLMs to proprietary organisational data. You may have many documents too large or numerous to include as context.
 
 This is where **Retrieval-Augmented Generation (RAG)** comes in - "when generating a response, retrieve relevant information first."
 
@@ -140,6 +138,16 @@ When you receive a query:
 
 #### Example: Planning Permission Assistant
 
+Perhaps you have hundreds of planning policy documents in PDF format stored in S3. You could build the RAG pipeline yourself (chunking, embedding, vector database), or use a managed service.
+
+**AWS Bedrock Knowledge Bases** is a managed service that handles the RAG pipeline automatically:
+
+- Point it at an S3 bucket containing your documents
+- It chunks the documents, generates embeddings, and stores them in a vector index
+- Provides a simple API to retrieve relevant chunks for any query
+
+Here's how you'd use it:
+
 ~~~ python
 bedrock_agent = boto3.client('bedrock-agent-runtime')
 
@@ -160,8 +168,6 @@ response = bedrock.converse(
     messages=[{'role': 'user', 'content': [{'text': f'Context:\n{context}\n\nQuestion: {question}'}]}]
 )
 ~~~
-
-Managed services like AWS Bedrock Knowledge Bases handle chunking, embedding, and retrieval automatically - you simply point it to an S3 bucket of documents.
 
 **Limitations:** Document chunking can split important context, semantic search isn't perfect and might miss relevant content, and hallucination risk remains when retrieved context is incomplete.
 
@@ -197,13 +203,15 @@ formatted = bedrock.converse(
 
 ### 3c: Hybrid RAG
 
-More recently, patterns combine both approaches - documents mapped to entities, allowing queries against both graph and vector databases for more accurate retrieval.
+More recently, patterns combine both approaches - documents are mapped to entities, allowing queries against both graph and vector databases for more accurate retrieval.
 
 Different patterns exist, but they use both structured relationships and unstructured context to better find relevant information. For example: find related entities in the graph, then use those entities to search the vector database for relevant document sections. Combine both for the LLM response.
 
 This overcomes limitations of each method - you get relational context from graphs and detailed textual information from document retrieval.
 
-However, even with sophisticated retrieval, there are scenarios where you need the model itself to *learn* domain-specific patterns. This is where custom training comes in.
+This overcomes limitations of each method - you get relational context from graphs and detailed textual information from document retrieval.
+
+All these retrieval patterns - whether document-based, graph-based, or hybrid - follow a fixed workflow: always retrieve, then generate. But what if we need more flexibility?
 
 ---
 
@@ -296,6 +304,8 @@ Agents are powerful but have significant limitations:
     - **Description quality**: Vague tool descriptions lead to incorrect selection
 
 The more freedom given to take actions, the more care needed with monitoring and understanding behavior.
+
+Agents provide dynamic, flexible workflows using external tools and data sources. But they still rely on the base model's capabilities and behavior. When you need to change how the model itself behaves - teaching it domain-specific patterns, formats, or styles - you need to modify the model through training.
 
 ---
 

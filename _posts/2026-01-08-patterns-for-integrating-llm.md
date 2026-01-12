@@ -36,13 +36,13 @@ A local council receives hundreds of enquiries daily. A simple LLM wrapper could
 
 You create a system prompt to define it's behaviour:
 
-~~~ text
+```
 "You are a council enquiry triage assistant. Classify incoming citizen 
 enquiries into: Planning, Waste Services, Council Tax, Housing, Highways, Other. 
 
 For each enquiry provide category, urgency (Low/Medium/High), and brief summary.
 Respond only in JSON format."
-~~~
+```
 
 **Input:** 
 `My bin hasn't been collected for two weeks`

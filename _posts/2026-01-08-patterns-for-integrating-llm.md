@@ -35,7 +35,8 @@ Every time we call the LLM, we provide this context. These models have limited c
 A local council receives hundreds of enquiries daily. A simple LLM wrapper could handle initial triage:
 
 You create a system prompt to define it's behaviour:
-~~~
+
+~~~ text
 "You are a council enquiry triage assistant. Classify incoming citizen 
 enquiries into: Planning, Waste Services, Council Tax, Housing, Highways, Other. 
 
@@ -43,9 +44,11 @@ For each enquiry provide category, urgency (Low/Medium/High), and brief summary.
 Respond only in JSON format."
 ~~~
 
-**Input:** `My bin hasn't been collected for two weeks`
+**Input:** 
+`My bin hasn't been collected for two weeks`
 
-**Output:** `{"category": "Waste Services", "urgency": "Medium", "summary": "Missed collection"}`
+**Output:** 
+`{"category": "Waste Services", "urgency": "Medium", "summary": "Missed collection"}`
 
 ### Implementation
 
@@ -221,7 +224,7 @@ Agents take a different approach: the LLM itself decides which actions to take a
 
 This is the **agent pattern** - give the LLM access to various tools and let it decide which to use.
 
-We're essentially saying:
+In this case:
 
 - The LLM agent has access to tools with descriptions and input schemas
 - It receives input and maps it to potential actions
@@ -275,14 +278,15 @@ response = bedrock_agent.invoke_agent(
 )
 ~~~
 
-Agent autonomously:
+THe agent will autonomously:
 
-1. Understands intent
-2. Calls appropriate tools in sequence
-3. Uses outputs to inform next actions
-4. Returns final result
+1. Understand intent
+2. Call appropriate tools in sequence
+3. Use outputs to inform next actions
+4. Return final result
 
-**Example request:** "My recycling wasn't collected last Tuesday at SW1A 1AA. Can you check when it's next due and report it?"
+**Example request:** 
+"My recycling wasn't collected last Tuesday at SW1A 1AA. Can you check when it's next due and report it?"
 
 The agent would: check the schedule, report the missed collection, and confirm the next date.
 
@@ -290,7 +294,7 @@ The agent would: check the schedule, report the missed collection, and confirm t
 
 **Model Context Protocol (MCP)** is emerging as a standard for defining tools that LLMs can use. MCP servers expose tools with descriptions and schemas, similar to the example above. This allows tools to be defined once and used across different LLM providers.
 
-An MCP server for council services might expose multiple tools (bin schedules, service requests, payment checks) that any MCP-compatible agent can discover and use. This standardization makes it easier to build reusable tool libraries.
+An MCP server for council services might expose multiple tools (bin schedules, service requests, payment checks) that any MCP-compatible agent can discover and use. This standardisation makes it easier to build reusable tool libraries.
 
 ### Limitations
 
@@ -316,13 +320,13 @@ This means teaching it task-specific behavior, domain language, and output forma
 
 ### Traditional ML vs LLM Fine-Tuning
 
-Traditional machine learning:
-```
+In traditional machine learning we might have:
+
 Small dataset (thousands of examples)
+
 → Extract features
 → Train small model (thousands of parameters)
 → Predict outcomes
-```
 
 But how do we apply this to models with **billions** of parameters?
 

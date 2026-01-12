@@ -209,8 +209,6 @@ Different patterns exist, but they use both structured relationships and unstruc
 
 This overcomes limitations of each method - you get relational context from graphs and detailed textual information from document retrieval.
 
-This overcomes limitations of each method - you get relational context from graphs and detailed textual information from document retrieval.
-
 All these retrieval patterns - whether document-based, graph-based, or hybrid - follow a fixed workflow: always retrieve, then generate. But what if we need more flexibility?
 
 ---
@@ -225,11 +223,11 @@ This is the **agent pattern** - give the LLM access to various tools and let it 
 
 We're essentially saying:
 
-    - The LLM agent has access to tools with descriptions and input schemas
-    - It receives input and maps it to potential actions
-    - If tools are relevant, it calls them and awaits responses
-    - It repeats until fully processing the input
-    - It returns the result
+- The LLM agent has access to tools with descriptions and input schemas
+- It receives input and maps it to potential actions
+- If tools are relevant, it calls them and awaits responses
+- It repeats until fully processing the input
+- It returns the result
 
 Under the hood, it's still orchestrated LLM calls, but the model's output serves as input to external actions.
 
@@ -275,13 +273,14 @@ response = bedrock_agent.invoke_agent(
     sessionId='unique-session-id',
     inputText=user_request
 )
-
-# Agent autonomously:
-# 1. Understands intent
-# 2. Calls appropriate tools in sequence
-# 3. Uses outputs to inform next actions
-# 4. Returns final result
 ~~~
+
+Agent autonomously:
+
+1. Understands intent
+2. Calls appropriate tools in sequence
+3. Uses outputs to inform next actions
+4. Returns final result
 
 **Example request:** "My recycling wasn't collected last Tuesday at SW1A 1AA. Can you check when it's next due and report it?"
 
@@ -297,11 +296,11 @@ An MCP server for council services might expose multiple tools (bin schedules, s
 
 Agents are powerful but have significant limitations:
 
-    - **Tool hallucination**: Might call non-existent tools or use incorrect parameters
-    - **Observability**: Difficult to debug why particular action sequences were chosen
-    - **Cost**: Iterative LLM calls become expensive quickly
-    - **Non-determinism**: Same input might produce different tool sequences
-    - **Description quality**: Vague tool descriptions lead to incorrect selection
+- **Tool hallucination**: Might call non-existent tools or use incorrect parameters
+- **Observability**: Difficult to debug why particular action sequences were chosen
+- **Cost**: Iterative LLM calls become expensive quickly
+- **Non-determinism**: Same input might produce different tool sequences
+- **Description quality**: Vague tool descriptions lead to incorrect selection
 
 The more freedom given to take actions, the more care needed with monitoring and understanding behavior.
 
@@ -341,8 +340,6 @@ Think of it as:
 You don't need to relearn grammar to learn terminology.
 
 The new information is "low rank" - it doesn't override fundamentals but adapts behavior for your specific use case.
-
-### Example: Medical Report Generation
 
 ### Example: Medical Report Generation
 

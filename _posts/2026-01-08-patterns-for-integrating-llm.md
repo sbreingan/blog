@@ -9,9 +9,7 @@ author: sbreingan
 
 Large Language Models are being integrated into applications and services across industries. But what does this actually look like architecturally? What are the main approaches available?
 
-In this blog post, I'll give a high-level view of the key architectural patterns for LLM integration. These patterns represent different ways of structuring how your application interacts with and leverages LLMs, from simple API calls to complex agent-based systems.
-
-This is a rapidly evolving space - that's why [architecture is exciting again](https://blog.scottlogic.com/2023/05/04/generative-ai-solution-architecture.html)! The patterns I describe here reflect how LLM usage has evolved so far. Some architectural principles may persist, but I expect new patterns and approaches to emerge as the field progresses and as models themselves become more capable.
+In this blog post, I'll give a high-level view of the key architectural patterns for LLM integration. These patterns represent different ways of structuring how your application interacts with and leverages LLMs, from simple API calls to complex agent-based systems. This is a rapidly evolving space however - many principles will persist but I expect new patterns and approaches to emerge as the field progresses and as models themselves become more capable.
 
 I've kept these patterns high-level, focusing on the core approaches. In practice, each pattern brings significant architectural choices around validation, testing, observability, security, and risk mitigation. Understanding which pattern fits your use case is just the beginning - the real architectural work lies in how you implement these patterns safely and reliably in production. That's where the most interesting decisions emerge, and where patterns continue to evolve.
 
@@ -398,21 +396,21 @@ Regardless of which pattern you choose, production LLM systems need protective l
 
 **Input Protection:**
 
-    - Content filtering to block inappropriate requests
-    - PII detection and redaction before reaching the model
-    - Prompt injection defense against malicious override attempts
+- Content filtering to block inappropriate requests
+- PII detection and redaction before reaching the model
+- Prompt injection defense against malicious override attempts
 
 **Output Validation:**
 
-    - Content policy enforcement for organizational standards
-    - Format validation for expected schemas
-    - Hallucination detection flagging confident but inaccurate responses
+- Content policy enforcement for organizational standards
+- Format validation for expected schemas
+- Hallucination detection flagging confident but inaccurate responses
 
 **Compliance & Governance:**
 
-    - Audit trails for all interactions
-    - Rate limiting to prevent runaway costs
-    - Access control ensuring authorized use only
+- Audit trails for all interactions
+- Rate limiting to prevent runaway costs
+- Access control ensuring authorized use only
 
 AWS Bedrock Guardrails can be configured with content filters, denied topics, word filters, PII redaction, and contextual grounding checks by applying a config parameter to API calls. 
 
